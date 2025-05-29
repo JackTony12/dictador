@@ -1,0 +1,116 @@
+---
+import "../styles/global.css"
+---
+
+<main class='my-0 mx-auto w-[500px]'>
+    <textarea id='textarea' rows='5' cols='30' maxlength={1000}></textarea><br
+    />
+    <label>Palabras por grupo:</label>
+    <select id='wordsPerGroup'>
+        <option value='3'>3</option>
+        <option value='5'>5</option>
+        <option value='10'>10</option>
+    </select>
+
+    <label>Segundos de pausa:</label>
+    <input type='number' id='pauseTime' value='2' min='1' max='10' />
+
+    <label>Repeticiones por grupo:</label>
+    <select id='timesToRepeat'>
+        <option value='1'>1</option>
+        <option value='2'>2</option>
+        <option value='3'>3</option>
+        <option value='4'>4</option>
+        <option value='5'>5</option>
+    </select>
+
+    <button>Dictar</button>
+</main>
+<script>
+    const symbolMap: Record<string, string> = {
+        ",": "coma",
+        ".": "punto",
+        ":": "dos puntos",
+        ";": "punto y coma",
+        "?": "signo de interrogación",
+        "!": "signo de exclamación",
+        "=>": "flecha",
+        "->": "flecha",
+        "(": "paréntesis abierto",
+        ")": "paréntesis cerrado",
+        "[": "corchete abierto",
+        "]": "corchete cerrado",
+        "{": "llave abierta",
+        "}": "llave cerrada",
+        '"': "comillas",
+        "'": "comilla",
+        "=": "igual",
+        "+": "más",
+        "-": "menos",
+        "*": "asterisco",
+        "/": "diagonal",
+        "\\": "diagonal invertida",
+        "#": "numeral",
+        "@": "arroba",
+        "&": "y comercial",
+        "%": "por ciento",
+    }
+    const $textarea = document.getElementById("textarea") as HTMLTextAreaElement
+    const $button = document.querySelector("button") as HTMLButtonElement
+    const $wordsPerGroup = document.getElementById(
+        "wordsPerGroup",
+    ) as HTMLSelectElement
+    const $pauseTime = document.getElementById("pauseTime") as HTMLInputElement
+    const $timesToRepeat = document.getElementById(
+        "timesToRepeat",
+    ) as HTMLSelectElement
+
+    $button.addEventListener("click", async () => {
+        const rawText = $textarea.value.trim()
+        const preprocessedText = reemplazarSimbolos(rawText)
+        const words = preprocessedText.split(/\s+/)
+        const wordsPerGroup = parseInt($wordsPerGroup.value)
+        const pauseTime = parseInt($pauseTime.value) * 1000
+        const repeatCount = parseInt($timesToRepeat.value)
+
+        for (let i = 0; i < words.length; i += wordsPerGroup) {
+            const chunk = words.slice(i, i + wordsPerGroup).join(" ")
+            for (let r = 0; r < repeatCount; r++) {
+                await speakText(chunk)
+                await delay(pauseTime)
+            }
+            if (i + wordsPerGroup < words.length) {
+                await delay(pauseTime)
+            }
+        }
+    })
+    function reemplazarSimbolos(texto: string) {
+        const sortedSymbols = Object.keys(symbolMap).sort(
+            (a, b) => b.length - a.length,
+        )
+
+        for (const simbolo of sortedSymbols) {
+            const palabra = symbolMap[simbolo]
+            const escapedSimbolo = simbolo.replace(
+                /[-\/\\^$*+?.()|[\]{}]/g,
+                "\\$&",
+            )
+            const regex = new RegExp(escapedSimbolo, "g")
+            texto = texto.replace(regex, ` ${palabra} `)
+        }
+
+        return texto
+    }
+
+    function speakText(text: string): Promise<void> {
+        return new Promise((resolve) => {
+            const utterance = new SpeechSynthesisUtterance(text)
+            utterance.onend = () => resolve()
+            speechSynthesis.speak(utterance)
+        })
+    }
+
+    function delay(ms: number): Promise<void> {
+        return new Promise((resolve) => setTimeout(resolve, ms))
+    }
+</script>
