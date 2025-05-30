@@ -2,29 +2,57 @@
 import "../styles/global.css"
 ---
 
-<main class='my-0 mx-auto w-[500px]'>
-    <textarea id='textarea' rows='5' cols='30' maxlength={1000}></textarea><br
-    />
-    <label>Palabras por grupo:</label>
-    <select id='wordsPerGroup'>
-        <option value='3'>3</option>
-        <option value='5'>5</option>
-        <option value='10'>10</option>
-    </select>
+<main class='my-0 mx-auto w-[600px] pt-43'>
+    <div class='py-4'>
+        <h1 class='font-black text-3xl text-gray-600'>Dictador de texto</h1>
+    </div>
+    <div class='flex gap-4 border border-gray-800 rounded-xl p-8'>
+        <textarea
+            class='resize-none border border-gray-900 p-4 rounded-lg'
+            id='textarea'
+            rows='10'
+            placeholder='Escribe aquí el texto que quieres dictar...'
+            cols='100'
+            maxlength={2000}></textarea>
+        <div class='border border-gray-900 p-4 rounded-xl w-[400px] relative'>
+            <div class='border border-amber-400 p-2 rounded-lg'>
+                <label>Palabras por grupo:</label>
 
-    <label>Segundos de pausa:</label>
-    <input type='number' id='pauseTime' value='2' min='1' max='10' />
-
-    <label>Repeticiones por grupo:</label>
-    <select id='timesToRepeat'>
-        <option value='1'>1</option>
-        <option value='2'>2</option>
-        <option value='3'>3</option>
-        <option value='4'>4</option>
-        <option value='5'>5</option>
-    </select>
-
-    <button>Dictar</button>
+                <select id='wordsPerGroup'>
+                    <option value='3'>3</option>
+                    <option value='5'>5</option>
+                    <option value='10'>10</option>
+                </select>
+            </div>
+            <div class='border border-amber-400 p-2 rounded-lg mt-1'>
+                <label>Tiempo de pausa:</label>
+                <input
+                    type='number'
+                    id='pauseTime'
+                    value='2'
+                    min='1'
+                    max='10'
+                />
+            </div>
+            <div class='border border-amber-400 p-2 rounded-lg mt-1'>
+                <label>Repeticiones por oracion</label>
+                <select id='timesToRepeat'>
+                    <option value='1'>1</option>
+                    <option value='2'>2</option>
+                    <option value='3'>3</option>
+                    <option value='4'>4</option>
+                    <option value='5'>5</option>
+                </select>
+            </div>
+            <div class='flex gap-2'>
+                <button id='play' class='btn mt-4 bg-green-700'>Dictar</button>
+                <button id='stop' class='btn_stop mt-4'>Parar</button>
+            </div>
+        </div>
+    </div>
+    <div class='text-center mt-4'>
+        <a target='_blank' href='https://antonyleonel.com'>AntonyLeonel.com</a>
+    </div>
 </main>
 <script>
     const symbolMap: Record<string, string> = {
@@ -56,7 +84,8 @@ import "../styles/global.css"
         "%": "por ciento",
     }
     const $textarea = document.getElementById("textarea") as HTMLTextAreaElement
-    const $button = document.querySelector("button") as HTMLButtonElement
+    const $buttonPlay = document.querySelector("#play") as HTMLButtonElement
+    const $buttonPause = document.querySelector("#stop") as HTMLButtonElement
     const $wordsPerGroup = document.getElementById(
         "wordsPerGroup",
     ) as HTMLSelectElement
@@ -65,7 +94,7 @@ import "../styles/global.css"
         "timesToRepeat",
     ) as HTMLSelectElement
 
-    $button.addEventListener("click", async () => {
+    $buttonPlay.addEventListener("click", async () => {
         const rawText = $textarea.value.trim()
         const preprocessedText = reemplazarSimbolos(rawText)
         const words = preprocessedText.split(/\s+/)
@@ -83,6 +112,9 @@ import "../styles/global.css"
                 await delay(pauseTime)
             }
         }
+    })
+    $buttonPause.addEventListener("click", () => {
+        speechSynthesis.cancel()
     })
     function reemplazarSimbolos(texto: string) {
         const sortedSymbols = Object.keys(symbolMap).sort(

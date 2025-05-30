@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@theme{
+ 
+}
 .btn{
-    @apply bg-red-500 font-bold text-white py-2 px-4 rounded w-24;
+    @apply font-bold text-white py-2 px-4 rounded w-24 cursor-pointer hover:bg-green-600 active:bg-green-800;
+}
+.btn_stop{
+    @apply bg-red-600 font-bold text-white py-2 px-4 rounded w-24 cursor-pointer hover:bg-red-600 active:bg-red-800;
 }
