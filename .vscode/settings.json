@@ -2,4 +2,5 @@
     "files.associations": {
         "*.css": "tailwindcss"
     },
+    "chat.agent.enabled": false,
 }

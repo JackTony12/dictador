@@ -1,0 +1,37 @@
+---
+const { data } = Astro.props
+---
+
+<div class='inline-block cursor-pointer hover:scale-110 transition duration-75'>
+    <svg
+        stroke='currentColor'
+        fill='orangered'
+        stroke-width='0'
+        viewBox='0 0 512 512'
+        height='.8em'
+        width='.8em'
+        id='info-icon'
+        ><path
+            d='M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z'
+        ></path></svg
+    >
+</div>
+<script>
+    const $icon = document.getElementById("info-icon") as HTMLElement
+    $icon.addEventListener("click", () => {
+        const info = document.createElement("div")
+        info.className =
+            "info-popup fixed left-[50%] top-[50%] inset-0 w-[400px] h-[200px] p-4 text-white rounded-xl  bg-gray-800 bg-opacity-75 z-50 "
+        info.innerHTML = `
+            <h2 class='text-orange-300 font-black'>Palabras por grupo</h2>
+            <small>Define el numero de plabras que dictara el speaker por cada pausa</small>
+            <button class='btn_stop block text-[12px]' id="close-info">Cerrar</button>
+        `
+        document.body.appendChild(info)
+
+        const closeButton = document.getElementById("close-info")
+        closeButton?.addEventListener("click", () => {
+            document.body.removeChild(info)
+        })
+    })
+</script>

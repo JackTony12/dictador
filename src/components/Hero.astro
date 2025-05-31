@@ -1,22 +1,23 @@
 ---
 import "../styles/global.css"
+import Info from "./info.astro"
 ---
 
-<main class='my-0 mx-auto w-[600px] pt-43'>
+<main class='my-0 mx-auto w-[70%] pt-43'>
     <div class='py-4'>
-        <h1 class='font-black text-3xl text-gray-600'>Dictador de texto</h1>
+        <h1 class='font-black text-3xl text-gray-700'>Dictador de texto</h1>
     </div>
-    <div class='flex gap-4 border border-gray-800 rounded-xl p-8'>
+    <div class='flex gap-4 rounded-xl p-8 bg-white'>
         <textarea
-            class='resize-none border border-gray-900 p-4 rounded-lg'
+            class='resize-none border border-gray-400 p-4 rounded-lg'
             id='textarea'
             rows='10'
             placeholder='Escribe aquí el texto que quieres dictar...'
             cols='100'
             maxlength={2000}></textarea>
         <div class='border border-gray-900 p-4 rounded-xl w-[400px] relative'>
-            <div class='border border-amber-400 p-2 rounded-lg'>
-                <label>Palabras por grupo:</label>
+            <div class='border border-blue-400 p-2 rounded-lg'>
+                <label>Palabras por grupo: <Info /></label>
 
                 <select id='wordsPerGroup'>
                     <option value='3'>3</option>
@@ -44,9 +45,28 @@ import "../styles/global.css"
                     <option value='5'>5</option>
                 </select>
             </div>
-            <div class='flex gap-2'>
-                <button id='play' class='btn mt-4 bg-green-700'>Dictar</button>
-                <button id='stop' class='btn_stop mt-4'>Parar</button>
+            <div class='flex flex-col'>
+                <div>
+                    <label class='block' for='rate'
+                        >Velocidad <span id='rate_value'>1</span></label
+                    >
+                    <input
+                        type='range'
+                        min='0.1'
+                        max='1.5'
+                        step='0.1'
+                        value='1'
+                        id='rate'
+                    />
+                </div>
+                <div>
+                    <button id='play' class='btn mt-4 bg-green-700'
+                        >Dictar</button
+                    >
+                    <button id='stop' class='btn_stop mt-4'>Cancelar</button>
+                    <button id='pause' class='btn_pause mt-4'>Pausar</button>
+                    <button id='continue' class='btn_pause mt-4'>Seguir</button>
+                </div>
             </div>
         </div>
     </div>
@@ -85,7 +105,11 @@ import "../styles/global.css"
     }
     const $textarea = document.getElementById("textarea") as HTMLTextAreaElement
     const $buttonPlay = document.querySelector("#play") as HTMLButtonElement
-    const $buttonPause = document.querySelector("#stop") as HTMLButtonElement
+    const $buttonCancel = document.querySelector("#stop") as HTMLButtonElement
+    const $buttonPause = document.querySelector("#pause") as HTMLButtonElement
+    const $buttonContinue = document.querySelector(
+        "#continue",
+    ) as HTMLButtonElement
     const $wordsPerGroup = document.getElementById(
         "wordsPerGroup",
     ) as HTMLSelectElement
@@ -93,6 +117,15 @@ import "../styles/global.css"
     const $timesToRepeat = document.getElementById(
         "timesToRepeat",
     ) as HTMLSelectElement
+
+    const $rate = document.getElementById("rate") as HTMLInputElement
+    const $rateValue = document.getElementById("rate_value") as HTMLSpanElement
+    let rate = 1
+    $rate.addEventListener("change", () => {
+        const ratevalue = $rate.value
+        $rateValue.textContent = ratevalue
+        rate = parseFloat(ratevalue)
+    })
 
     $buttonPlay.addEventListener("click", async () => {
         const rawText = $textarea.value.trim()
@@ -113,8 +146,23 @@ import "../styles/global.css"
             }
         }
     })
+    $buttonCancel.addEventListener("click", () => {
+        if (speechSynthesis.speaking) {
+            speechSynthesis.cancel()
+            console.log("Dictado detenido")
+        }
+    })
     $buttonPause.addEventListener("click", () => {
-        speechSynthesis.cancel()
+        if (speechSynthesis.speaking) {
+            speechSynthesis.pause()
+            console.log("Dictado detenido")
+        }
+    })
+    $buttonContinue.addEventListener("click", () => {
+        if (speechSynthesis.speaking) {
+            speechSynthesis.resume()
+            console.log("Dictado detenido")
+        }
     })
     function reemplazarSimbolos(texto: string) {
         const sortedSymbols = Object.keys(symbolMap).sort(
@@ -138,6 +186,7 @@ import "../styles/global.css"
         return new Promise((resolve) => {
             const utterance = new SpeechSynthesisUtterance(text)
             utterance.onend = () => resolve()
+            utterance.rate = rate
             speechSynthesis.speak(utterance)
         })
     }
